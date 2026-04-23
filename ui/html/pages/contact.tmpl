@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    {{define "title"}}Contact{{end}}
+</head>
+<body> 
+<header>
+   <h1>Skill<em>Route</em></h1>
+</header>
+    {{define "main"}}
+    <h3>Contact Us</h3>
+    <form action="/contact" method="POST">
+        <div class="form-group">
+            <label for="name">Name:</label><br>
+            <input type="text" id="name" name="name" placeholder="Enter your name" required>
+        </div>
+
+        <div class="form-group">
+            <label for="message">Message:</label><br>
+            <textarea id="message" name="message" rows="5" placeholder="How can we help?" required></textarea>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit">Send Message</button>
+        </div>
+    </form>
+    {{end}}
+    <footer></footer>
+</body>
