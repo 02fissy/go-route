@@ -3,22 +3,22 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"os"
-	
 )
 
-
+var tplHome = mustParseTemplates("base", "pages/home")
 func home(w http.ResponseWriter, r *http.Request) {
-	render(w, "./ui/html", Sources{Base: "base.tmpl", Page: "pages/home.tmpl"}, nil)
+	render(w, tplHome, nil)
 }
 
+var tplAbout = mustParseTemplates("base", "pages/about")
 func about(w http.ResponseWriter, r *http.Request) {
-	render(w, "./ui/html", Sources{Base: "base.tmpl", Page: "pages/about.tmpl"}, nil)
+	render(w, tplAbout, nil)
 }
 
+var tplContact = mustParseTemplates("base", "pages/contact")
 func contact(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
-		render(w, "./ui/html", Sources{Base: "base.tmpl", Page: "pages/contact.tmpl"}, nil)
+		render(w, tplContact, nil)
 		return
 	}
 
@@ -26,13 +26,10 @@ func contact(w http.ResponseWriter, r *http.Request) {
 	name := r.PostFormValue("name")
 	msg := r.PostFormValue("message")
 
-	f, err := os.OpenFile("contacts.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
+	if err := saveContactRequest(name, msg); err != nil {
 		http.Error(w, "Database Error", http.StatusInternalServerError)
 		return
 	}
-	defer f.Close()
 
-	f.WriteString(fmt.Sprintf("Name: %s | Message: %s\n", name, msg))
 	fmt.Fprint(w, "Your message was saved.")
 }

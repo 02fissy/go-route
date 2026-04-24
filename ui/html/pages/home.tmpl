@@ -1,22 +1,11 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    {{define "title"}}Home{{end}}
-</head>
-<body> 
-<header>
-   <h1>Skill<em>Route</em></h1>
-</header>
-    {{define "main"}}
+
+{{define "title"}}Home{{end}}
+
+{{define "main"}}
     <h3>Click the button below to see our official logo</h3>
     <input type="checkbox" id="logo-toggle" class="toggle-input">
     <div class="image-wrapper">
         <img src="/static/images/skillroute2-removebg-preview.png" alt="Logo" class="target-logo">
     </div>
     <label for="logo-toggle" class="toggle-button">View Logo</label>
-    {{end}}
-    <footer></footer>
-</body>
-
-</html>
+{{end}}

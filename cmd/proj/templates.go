@@ -1,56 +1,85 @@
 package main
 
 import (
-	"path/filepath"
+	"bytes"
+	"fmt"
 	"html/template"
+	"log/slog"
 	"net/http"
+	"path/filepath"
 )
 
-type tempSrc interface{
+
+const tplDir = "./ui/html"
+const tplExt = ".tmpl"
+
+type tplSrc interface{
 	Layout() string
 	Others() []string
 }
 
-type Sources struct{
-	Base string
-	Page string 
-}
-func (t Sources) Layout() string {
-	return t.Base
-}
-
-func (t Sources) Others() []string {
-	return []string{t.Page}
-}
-
-
-func parseTemplates(baseDir string, tplFiles tempSrc) (*template.Template, error) {
-	files := []string{filepath.Join(baseDir, tplFiles.Layout())}
-
-	for _, path := range tplFiles.Others() {
-		files = append(files, filepath.Join(baseDir, path))
+func mustParseSet(tplSet TemplateSet) *template.Template {
+	tpl, err := parseTemplates(tplDir, tplExt, tplSet)
+	if err != nil {
+		panic(fmt.Sprintf("Failed to parse templateSet (%q): %s", tplSet.Others()[0], err.Error()))
 	}
+	return tpl
+}
+
+func mustParseTemplates(base string, others ...string) *template.Template {
+	return mustParseSet(newSet(base, others...))
+}
+
+func parseTemplates(baseDir, tplExt string, tplFiles tplSrc) (*template.Template, error) {
+	files := append([]string{tplFiles.Layout()}, tplFiles.Others()...)
+	files = normalize(baseDir, tplExt, files...)
+	// the two lines above can be replaced with a single line (below). That said, the two lines version is better for readability.
+	// files := normalize(baseDir, tplExt, append([]string{tplFiles.Layout()}, tplFiles.Others()...)...)
+
 	ts, err := template.ParseFiles(files...)
 	if err != nil {
 		return nil, err
 	}
 
-	ts, err = ts.ParseGlob(filepath.Join(baseDir, "subs/*.tmpl"))
+	ts, err = ts.ParseGlob(filepath.Join(baseDir, fmt.Sprint("subs/*", tplExt)))
 	if err != nil {
 		return nil, err
 	}
 
 	return ts, nil
 }
-func render(w http.ResponseWriter, baseDir string, tpl tempSrc, data any) {
-	ts, err := parseTemplates(baseDir, tpl)
-	if err != nil {
-		http.Error(w, "Template Error: "+err.Error(), http.StatusInternalServerError)
-		return
+
+func normalize(baseDir, ext string, files ...string) []string {
+
+	for i, f := range files {
+		if filepath.Ext(f) == "" {
+			files[i] += tplExt
+		}
+		files[i] = filepath.Join(baseDir, files[i])
 	}
 
-	err = ts.ExecuteTemplate(w, "base", data)
-	if err != nil {
-		http.Error(w, "Execution Error: "+err.Error(), http.StatusInternalServerError)
-	}
+	return files
 }
+
+func render(w http.ResponseWriter, tpl *template.Template, data any) error {
+
+	buff := new(bytes.Buffer)
+	if err := tpl.Execute(buff, data); err != nil {
+		handleErr(w, err)
+		return err
+	}
+	
+	_, err := buff.WriteTo(w)
+	if err != nil {
+		handleErr(w, err)
+		return err 
+	}
+
+	return nil
+}
+
+func handleErr(w http.ResponseWriter, err error) {
+	http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	slog.Error("Error: %s\n", err.Error())
+}
+
