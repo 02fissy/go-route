@@ -16,12 +16,22 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
         http.Error(w, "Server Error", http.StatusInternalServerError)
         return
     }
-    for _, quiz := range quizzes {
-        fmt.Fprintf(w, "%+v\n", quiz)
+    data := templateData{
+		Quizzes: quizzes,
+	}
+	err = tplHome.Execute(w, data)
+    if err != nil {
+        app.logger.Error(err.Error())
+        http.Error(w, "Internal Server Error", http.StatusInternalServerError)
     }
-    // files := []strin
-	app.logger.Info("Rendering home page")
-	render(w, tplHome, nil)
+}
+var tplCreate = mustParseTemplates("base", "pages/create")
+func (app *application) quizzesCreate(w http.ResponseWriter, r *http.Request){
+	err := tplCreate.Execute(w, nil)
+	if err != nil {
+		app.logger.Error(err.Error())
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	}
 }
 var tplView = mustParseTemplates("base", "pages/view")
 func (app *application) quizzesView(w http.ResponseWriter, r *http.Request){
@@ -39,7 +49,10 @@ func (app *application) quizzesView(w http.ResponseWriter, r *http.Request){
 		}
 		return
 	}
-	err = tplView.Execute(w, quiz)
+	data := templateData{
+		Quizz: quiz,
+	}
+	err = tplView.Execute(w, data)
     if err != nil {
         app.logger.Error(err.Error())
         http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -47,20 +60,21 @@ func (app *application) quizzesView(w http.ResponseWriter, r *http.Request){
 }
 
 func (app *application) quizzesCreatePost(w http.ResponseWriter, r *http.Request) {
-    // Create some variables holding dummy data. We'll remove these later on
-    // during the build.
-    skill := "Python"
-    quiz := "What is the modern way of declaring a variable in Python?\nA. var x = 10\nB. let x = 10"
-    // Pass the data to the QuizModel.Insert() method, receiving the
-    // ID of the new record back.
-    id, err := app.quizzes.Insert(skill, quiz)
-    if err != nil {
-        http.Error(w, "Database Error", http.StatusInternalServerError)
-        return
-    }
-    // Redirect the user to the relevant page for the quiz.
-    http.Redirect(w, r, fmt.Sprintf("/quizzes/view/%d", id), http.StatusSeeOther)
+    err := r.ParseForm()
+	if  err != nil {
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+	skill := r.PostFormValue("skill")
+	quiz := r.PostFormValue("quiz")
 
+	id, err := app.quizzes.Insert(skill, quiz)
+	if err != nil {
+		http.Error(w, "Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, fmt.Sprintf("/quizzes/view/%d", id), http.StatusSeeOther)
 }
 var tplAbout = mustParseTemplates("base", "pages/about")
 func (app *application) about(w http.ResponseWriter, r *http.Request) {

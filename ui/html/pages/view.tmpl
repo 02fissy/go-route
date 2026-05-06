@@ -1,5 +1,6 @@
-{{define "title"}}Quiz #{{.ID}}{{end}}
+{{define "title"}}Quiz #{{.Quizz.ID}}{{end}}
 {{define "main"}}
+    {{with .Quizz}}
     <div class='quiz'>
         <div class='metadata'>
             <strong>{{.Skill}}</strong>
@@ -10,4 +11,5 @@
             <time>Created: {{.Created}}</time>
         </div>
     </div>
+    {{end}}
 {{end}}

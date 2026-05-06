@@ -23,20 +23,18 @@ func (m *QuizModel) Insert(skill string, quiz string ) (int, error){
     if err != nil {
         return 0, err
     }
-    // Use the LastInsertId() method on the result to get the ID of our
-    // newly inserted record in the snippets table.
+    
     id, err := result.LastInsertId()
     if err != nil {
         return 0, err
     }
-    // The ID returned has the type int64, so we convert it to an int type
-    // before returning.
+   
     return int(id), nil
 }
 func(m *QuizModel) Get(id int) (Quiz, error){
 	stmt := `SELECT id, skill, quiz, created FROM quizzes
          WHERE id = ?`
-	   // holds the result from the database.
+	   
     row := m.DB.QueryRow(stmt, id)
 	
     var s Quiz

@@ -2,10 +2,24 @@
 {{define "title"}}Home{{end}}
 
 {{define "main"}}
-    <h3>Click the button below to see our official logo</h3>
-    <input type="checkbox" id="logo-toggle" class="toggle-input">
-    <div class="image-wrapper">
-        <img src="/static/images/skillroute2-removebg-preview.png" alt="Logo" class="target-logo">
-    </div>
-    <label for="logo-toggle" class="toggle-button">View Logo</label>
+    <h2>Latest Quizzes</h2>
+    {{if .Quizzes}}
+    <table>
+            <tr>
+                <th>ID</th>
+                <th>Skill</th>
+                <th>Created</th>
+            </tr>
+            {{range .Quizzes}}
+            <tr>
+                <td><a href="/quizzes/view/{{.ID}}">#{{.ID}}</a></td>
+                <td>{{.Skill}}</td>
+                <td>{{.Created}}</td>
+            </tr>
+            {{end}}
+    </table>
+    {{else}}
+      <p>There's nothing to see here... yet!</p>
+    {{end}}
 {{end}}
+

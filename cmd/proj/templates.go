@@ -8,8 +8,14 @@ import (
 	"net/http"
 	"path/filepath"
 
+	"displaybox.fisayoai.net/internal/models"
+
 )
 
+type templateData struct{
+	Quizz models.Quiz
+	Quizzes []models.Quiz
+}
 
 const tplDir = "./ui/html"
 const tplExt = ".tmpl"

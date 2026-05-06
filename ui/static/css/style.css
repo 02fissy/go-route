@@ -41,7 +41,7 @@ nav a{
     }
 }
 main{
-    margin-top: 16%;
+    margin-top: 12%;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -78,8 +78,8 @@ main{
 }
 form{
     padding: 20px;
-    max-width: 500px;
-    background-color: #f59cf5;
+    max-width: 1000px;
+    background-color: #f8ddf8;
     border-radius: 12px;
 }
 .form-group {
