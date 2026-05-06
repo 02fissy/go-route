@@ -102,3 +102,48 @@ button {
 button:hover {
     background-color: #0056b3;
 }
+.quiz{
+    background-color: #ffffff;
+    border: 1px solid #E4E5E7;
+    border-radius: 3px;
+}
+.quiz pre {
+    padding: 18px;
+    border-top: 1px solid #E4E5E7;
+    border-bottom: 1px solid #E4E5E7;
+}
+.quiz .metadata{
+    background-color: #f7f9fa;
+    color: #6a6c6f;
+    padding: 0.75em 18px;
+    overflow: auto;
+}
+.quiz .metadata span{
+    float: right;
+}
+.quiz .metadata strong{
+    color: #34495e;
+}
+.quiz .metadata time{
+    display: inline-block;
+}
+.quiz .metadata time:first-child{
+    float: left;
+}
+.quiz .metadata time:last-child{
+    float: right;
+}
+table{
+    background: white;
+    border: 1px solid #E4E5E7;
+    border-collapse: collapse;
+    width: 100%;
+}
+td, th{
+    text-align: left;
+    padding: 9px 18px;
+}
+th:last-child, td:last-child{
+    text-align: right;
+    color: #6a6c6f;
+}
