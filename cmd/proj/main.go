@@ -19,6 +19,21 @@ type application struct {
 	formDecoder *form.Decoder
 	templateCache map[string]*template.Template
 }
+//using constructor dependency injection
+func NewApplication(
+    logger *slog.Logger, 
+    quizzes *models.QuizModel, 
+    formDecoder *form.Decoder, 
+    templateCache map[string]*template.Template,
+) *application {
+    
+    return &application{
+        logger:        logger,
+        quizzes:       quizzes,
+        formDecoder:   formDecoder,
+        templateCache: templateCache,
+    }
+}
 func main() {
 
 	addr := flag.String("addr", ":8080", "HTTP network address")
@@ -42,12 +57,12 @@ func main() {
         logger.Error(err.Error())
         os.Exit(1)
     }
-	  app := &application{
-        logger: logger,
-		quizzes: &models.QuizModel{DB: db},
-		formDecoder: formDecoder,
-		templateCache: templateCache,
-	  }
+	  app := NewApplication(
+        logger,
+		&models.QuizModel{DB: db},
+		formDecoder,
+		templateCache,
+	  )
 
 
 
