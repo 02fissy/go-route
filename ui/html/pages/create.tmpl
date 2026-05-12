@@ -5,11 +5,18 @@
     <form action="/quizzes/create" method="POST">
         <div>
             <label for="skill">Skill:</label>
-            <input type="text" id="skill" name="skill" required>
+            {{with .Form.FieldErrors.skill}}
+            <label class='error'>{{.}}</label>
+        {{end}}
+        
+            <input type="text" name="skill" value="{{.Form.Skill}}">
         </div>
         <div>
             <label for="quiz">Quiz:</label>
-            <textarea id="quiz" name="quiz" rows="5" required></textarea>
+            {{with .Form.FieldErrors.quiz}}
+            <label class='error'>{{.}}</label>
+        {{end}}
+            <textarea id="quiz" name="quiz" rows="5">{{.Form.Quiz}}</textarea>
         </div>
         <div>
         <button type="submit">Create Quiz</button>

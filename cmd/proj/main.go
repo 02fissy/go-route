@@ -3,16 +3,21 @@ package main
 import (
 	"database/sql"
 	"flag"
+	"html/template"
 	"log/slog"
 	"net/http"
 	"os"
 
-	"displaybox.fisayoai.net/internal/models"
+	"displaybox.fisayoai.net/internal/models" 
+	"github.com/go-playground/form/v4"
 	_ "github.com/go-sql-driver/mysql"
+
 )
 type application struct {
     logger *slog.Logger
 	quizzes *models.QuizModel
+	formDecoder *form.Decoder
+	templateCache map[string]*template.Template
 }
 func main() {
 
@@ -30,9 +35,18 @@ func main() {
     }
 	defer db.Close()
 
+	formDecoder :=form.NewDecoder()
+	
+	templateCache, err := newTemplateCache()
+    if err != nil {
+        logger.Error(err.Error())
+        os.Exit(1)
+    }
 	  app := &application{
         logger: logger,
 		quizzes: &models.QuizModel{DB: db},
+		formDecoder: formDecoder,
+		templateCache: templateCache,
 	  }
 
 

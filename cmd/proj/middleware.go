@@ -16,7 +16,7 @@ func commonHeaders( next http.Handler) http.Handler{
 		next.ServeHTTP(w, r)
 	})
 }
-func (app *application)  logRequest(next http.Handler) http.Handler{
+func (app *application) logRequest(next http.Handler) http.Handler{
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var (
 			ip = r.RemoteAddr
