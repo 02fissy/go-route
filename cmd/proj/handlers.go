@@ -97,6 +97,7 @@ func (app *application) quizzesCreatePost(w http.ResponseWriter, r *http.Request
 		http.Error(w, "Server Error", http.StatusInternalServerError)
 		return
 	}
+	app.sessionManager.Put(r.Context(), "flash", "Quiz successfully created!")
 
 	http.Redirect(w, r, fmt.Sprintf("/quizzes/view/%d", id), http.StatusSeeOther)
 }

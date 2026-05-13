@@ -7,31 +7,33 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"time"
 
 	"displaybox.fisayoai.net/internal/models" 
-	"github.com/go-playground/form/v4"
+	"github.com/alexedwards/scs/mysqlstore"
+	"github.com/alexedwards/scs/v2"
 	_ "github.com/go-sql-driver/mysql"
 
 )
 type application struct {
     logger *slog.Logger
 	quizzes *models.QuizModel
-	formDecoder *form.Decoder
 	templateCache map[string]*template.Template
+	sessionManager *scs.SessionManager
 }
 //using constructor dependency injection
 func NewApplication(
     logger *slog.Logger, 
     quizzes *models.QuizModel, 
-    formDecoder *form.Decoder, 
     templateCache map[string]*template.Template,
+	sessionManager *scs.SessionManager,
 ) *application {
     
     return &application{
         logger:        logger,
         quizzes:       quizzes,
-        formDecoder:   formDecoder,
         templateCache: templateCache,
+		sessionManager: sessionManager,
     }
 }
 func main() {
@@ -50,18 +52,23 @@ func main() {
     }
 	defer db.Close()
 
-	formDecoder :=form.NewDecoder()
 	
 	templateCache, err := newTemplateCache()
     if err != nil {
         logger.Error(err.Error())
         os.Exit(1)
     }
+
+	sessionManager := scs.New()
+	sessionManager.Store = mysqlstore.New(db)
+	sessionManager.Lifetime = 12 * time.Hour
+
+
 	  app := NewApplication(
         logger,
 		&models.QuizModel{DB: db},
-		formDecoder,
 		templateCache,
+		sessionManager,
 	  )
 
 
