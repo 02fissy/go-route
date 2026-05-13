@@ -1,9 +1,9 @@
 package models
 
-import(
-	"time"
+import (
 	"database/sql"
 	"errors"
+	"time"
 )
 
 type Quiz struct{
@@ -11,6 +11,12 @@ type Quiz struct{
 	Skill string
 	Quiz string
 	Created time.Time
+}
+
+type QuizModeler interface{
+    Insert(skill string, quiz string ) (int, error)
+    Get(id int) (Quiz, error)
+    Latest() ([]Quiz, error)
 }
 
 type QuizModel struct{

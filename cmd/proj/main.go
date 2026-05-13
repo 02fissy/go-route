@@ -9,15 +9,15 @@ import (
 	"os"
 	"time"
 
-	"displaybox.fisayoai.net/internal/models" 
+	"displaybox.fisayoai.net/internal/models"
 	"github.com/alexedwards/scs/mysqlstore"
 	"github.com/alexedwards/scs/v2"
 	_ "github.com/go-sql-driver/mysql"
-
 )
+
 type application struct {
     logger *slog.Logger
-	quizzes *models.QuizModel
+	quizzes models.QuizModeler
 	templateCache map[string]*template.Template
 	sessionManager *scs.SessionManager
 }
@@ -36,6 +36,7 @@ func NewApplication(
 		sessionManager: sessionManager,
     }
 }
+
 func main() {
 
 	addr := flag.String("addr", ":8080", "HTTP network address")
@@ -53,7 +54,7 @@ func main() {
 	defer db.Close()
 
 	
-	templateCache, err := newTemplateCache()
+	templateCache, err := newTemplateCacheV2()
     if err != nil {
         logger.Error(err.Error())
         os.Exit(1)
@@ -78,6 +79,7 @@ func main() {
 
 	logger.Error(err.Error())
 }
+
 func openDB(dsn string) (*sql.DB, error) {
     db, err := sql.Open("mysql", dsn)
     if err != nil {
