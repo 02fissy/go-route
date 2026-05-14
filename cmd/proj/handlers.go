@@ -17,7 +17,7 @@ type quizCreateForm struct {
 
 //var tplHome = mustParseTemplates("base", "pages/home")
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
-	  quizzes, err := app.quizzes.Latest()
+	quizzes, err := app.quizzes.Latest()
     if err != nil {
         http.Error(w, "Server Error", http.StatusInternalServerError)
         return

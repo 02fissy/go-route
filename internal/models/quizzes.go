@@ -24,7 +24,7 @@ type QuizModel struct{
 }
 func (m *QuizModel) Insert(skill string, quiz string ) (int, error){
 	  stmt := `INSERT INTO quizzes (skill, quiz, created)
-    VALUES(?, ?, UTC_TIMESTAMP())`
+    VALUES(?, ?, CURRENT_TIMESTAMP)`
     result, err := m.DB.Exec(stmt, skill, quiz)
     if err != nil {
         return 0, err

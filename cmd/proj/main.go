@@ -10,9 +10,9 @@ import (
 	"time"
 
 	"displaybox.fisayoai.net/internal/models"
-	"github.com/alexedwards/scs/mysqlstore"
+	"github.com/alexedwards/scs/sqlite3store"
 	"github.com/alexedwards/scs/v2"
-	_ "github.com/go-sql-driver/mysql"
+	_ "modernc.org/sqlite"
 )
 
 type application struct {
@@ -21,26 +21,11 @@ type application struct {
 	templateCache map[string]*template.Template
 	sessionManager *scs.SessionManager
 }
-//using constructor dependency injection
-func NewApplication(
-    logger *slog.Logger, 
-    quizzes *models.QuizModel, 
-    templateCache map[string]*template.Template,
-	sessionManager *scs.SessionManager,
-) *application {
-    
-    return &application{
-        logger:        logger,
-        quizzes:       quizzes,
-        templateCache: templateCache,
-		sessionManager: sessionManager,
-    }
-}
 
 func main() {
 
 	addr := flag.String("addr", ":8080", "HTTP network address")
-	dsn := flag.String("dsn", "displaybox_web:0204@/displaybox?parseTime=true", "MySQL data source name")
+	dsn := flag.String("dsn", "displaybox.db", "SQlite database")
 	flag.Parse()
 
 	logger:= slog.New(slog.NewTextHandler(os.Stdout, nil))
@@ -61,7 +46,7 @@ func main() {
     }
 
 	sessionManager := scs.New()
-	sessionManager.Store = mysqlstore.New(db)
+	sessionManager.Store = sqlite3store.New(db)
 	sessionManager.Lifetime = 12 * time.Hour
 
 
@@ -81,14 +66,43 @@ func main() {
 }
 
 func openDB(dsn string) (*sql.DB, error) {
-    db, err := sql.Open("mysql", dsn)
+    db, err := sql.Open("sqlite", dsn)
     if err != nil {
         return nil, err
     }
+
+	db.SetMaxOpenConns(1)
     err = db.Ping()
     if err != nil {
         db.Close()
         return nil, err
     }
+
+	schema, err := os.ReadFile("internal/database/quizzes.sql")
+	if err != nil {
+		db.Close()
+		return nil, err
+	}
+	_, err = db.Exec(string(schema))
+	if err != nil {
+		db.Close()
+		return nil, err
+	}
+
     return db, nil
+}
+//using constructor dependency injection
+func NewApplication(
+    logger *slog.Logger, 
+    quizzes *models.QuizModel, 
+    templateCache map[string]*template.Template,
+	sessionManager *scs.SessionManager,
+) *application {
+    
+    return &application{
+        logger:        logger,
+        quizzes:       quizzes,
+        templateCache: templateCache,
+		sessionManager: sessionManager,
+    }
 }
