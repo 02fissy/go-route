@@ -9,9 +9,11 @@ import (
 	"os"
 	"time"
 
+	"displaybox.fisayoai.net/internal/database"
 	"displaybox.fisayoai.net/internal/models"
 	"github.com/alexedwards/scs/sqlite3store"
 	"github.com/alexedwards/scs/v2"
+	"github.com/pressly/goose/v3"
 	_ "modernc.org/sqlite"
 )
 
@@ -65,12 +67,28 @@ func main() {
 	logger.Error(err.Error())
 }
 
+func runMigrations(db *sql.DB) error {
+	goose.SetBaseFS(database.MigrationsFS)
+
+	if err:= goose.SetDialect("sqlite"); err != nil {
+		return err
+	}
+	if err := goose.Up(db, "migrations"); err != nil {
+		return err
+	}
+	return nil
+}
+
 func openDB(dsn string) (*sql.DB, error) {
     db, err := sql.Open("sqlite", dsn)
     if err != nil {
         return nil, err
     }
-
+	err = runMigrations(db)
+	if err != nil {
+		db.Close()
+		return nil, err
+	}
 	db.SetMaxOpenConns(1)
     err = db.Ping()
     if err != nil {
@@ -78,16 +96,16 @@ func openDB(dsn string) (*sql.DB, error) {
         return nil, err
     }
 
-	schema, err := os.ReadFile("internal/database/quizzes.sql")
-	if err != nil {
-		db.Close()
-		return nil, err
-	}
-	_, err = db.Exec(string(schema))
-	if err != nil {
-		db.Close()
-		return nil, err
-	}
+	// schema, err := os.ReadFile("internal/database/quizzes.sql")
+	// if err != nil {
+	// 	db.Close()
+	// 	return nil, err
+	// }
+	// _, err = db.Exec(string(schema))
+	// if err != nil {
+	// 	db.Close()
+	// 	return nil, err
+	// }
 
     return db, nil
 }
